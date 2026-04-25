@@ -1,0 +1,7 @@
+target/
+models/
+*.gguf
+*.bin
+*.onnx
+.env
+.DS_Store
