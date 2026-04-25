@@ -11,3 +11,4 @@ ndarray = "0.17.2"
 rubato = "2.0.0"
 audioadapter-buffers = "3.0.0"
 chrono = { workspace = true }
+tokio = { workspace = true }

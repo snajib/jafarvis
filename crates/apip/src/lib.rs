@@ -1,4 +1,5 @@
 pub mod capture;
+pub mod chunker;
 pub mod error;
 pub mod input;
 pub mod resample;
