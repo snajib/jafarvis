@@ -1,5 +1,6 @@
 target/
-models/
+models/*.onnx
+models/*.tflite
 *.gguf
 *.bin
 *.onnx
