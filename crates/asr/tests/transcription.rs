@@ -1,5 +1,5 @@
-use asr::{AsrError, Transcriber, SAMPLE_RATE};
 use apip::AudioChunk;
+use asr::{AsrError, SAMPLE_RATE, Transcriber};
 use std::env;
 
 fn model_path() -> String {
@@ -54,11 +54,7 @@ fn transcribes_silence() {
 
   // silence typically produces empty or minimal output
   let text = result.unwrap();
-  assert!(
-    text.len() < 50,
-    "unexpected output for silence: {:?}",
-    text
-  );
+  assert!(text.len() < 50, "unexpected output for silence: {:?}", text);
 }
 
 // NOTE: real audio fixtures would go here

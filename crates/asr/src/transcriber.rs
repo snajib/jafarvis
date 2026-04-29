@@ -1,6 +1,6 @@
+use crate::SAMPLE_RATE;
 use crate::error::AsrError;
 use crate::whisper_ffi;
-use crate::SAMPLE_RATE;
 use apip::AudioChunk;
 use std::ffi::{CStr, CString};
 

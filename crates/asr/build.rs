@@ -6,10 +6,7 @@ fn main() {
   let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
   let whisper_dir = manifest_dir.join("../../vendor/whisper.cpp");
 
-  println!(
-    "cargo:rerun-if-changed={}",
-    whisper_dir.to_str().unwrap()
-  );
+  println!("cargo:rerun-if-changed={}", whisper_dir.to_str().unwrap());
 
   let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
 
@@ -30,9 +27,17 @@ fn main() {
 
   config.profile("Release");
 
-  if cfg!(target_os = "macos") {
+  // platform-specific acceleration
+  #[cfg(target_os = "macos")]
+  {
     config.define("GGML_ACCELERATE", "ON");
     println!("cargo:rustc-link-lib=framework=Accelerate");
+  }
+
+  #[cfg(target_os = "linux")]
+  {
+    config.define("GGML_BLAS", "ON");
+    println!("cargo:rustc-link-lib=dylib=openblas");
   }
 
   let dst = config.build();
@@ -45,11 +50,12 @@ fn main() {
   println!("cargo:rustc-link-lib=static=ggml-blas");
   println!("cargo:rustc-link-lib=static=ggml-base");
 
-  if cfg!(target_os = "macos") {
-    println!("cargo:rustc-link-lib=dylib=c++");
-  } else {
-    println!("cargo:rustc-link-lib=dylib=stdc++");
-  }
+  // C++ stdlib - default to libstdc++, override on macOS
+  #[cfg(target_os = "linux")]
+  println!("cargo:rustc-link-lib=dylib=stdc++");
+
+  #[cfg(target_os = "macos")]
+  println!("cargo:rustc-link-lib=dylib=c++");
 
   // Bindgen FFI generation
   let mut builder = bindgen::Builder::default()
@@ -60,9 +66,10 @@ fn main() {
       whisper_dir.join("ggml/include").to_str().unwrap()
     ));
 
-  // Platform-specific clang args for system headers
-  if cfg!(target_os = "macos") {
-    // Use xcrun to get SDK path dynamically
+  // platform-specific clang args for system headers
+  #[cfg(target_os = "macos")]
+  {
+    // use xcrun to get SDK path dynamically
     if let Ok(output) = Command::new("xcrun").arg("--show-sdk-path").output() {
       if output.status.success() {
         let sdk_path = String::from_utf8_lossy(&output.stdout).trim().to_string();
