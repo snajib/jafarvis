@@ -15,7 +15,7 @@ pub enum VadDecision {
 
 impl Vad {
   pub fn new(model_path: impl AsRef<std::path::Path>, threshold: f32) -> Result<Self, ApipError> {
-    ort::init().with_name("lebi").commit();
+    ort::init().with_name("jafarvis").commit();
 
     let session = Session::builder()
       .map_err(|e| ApipError::Device(e.to_string()))?

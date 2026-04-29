@@ -87,6 +87,7 @@ impl Chunker {
     let chunk = AudioChunk {
       samples,
       sample_rate: self.sample_rate,
+      is_speech: false,
     };
 
     self

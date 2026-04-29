@@ -99,6 +99,7 @@ impl AudioSource for InputCapture {
     Ok(AudioChunk {
       samples,
       sample_rate: self.sample_rate,
+      is_speech: false,
     })
   }
 }

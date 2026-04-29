@@ -1,0 +1,11 @@
+[package]
+name = "wuw"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+apip = { path = "../apip" }
+ort = { workspace = true }
+ndarray = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }

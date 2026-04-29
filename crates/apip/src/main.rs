@@ -46,6 +46,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let resampled_chunk = AudioChunk {
       samples: resampled,
       sample_rate: TARGET_SAMPLE_RATE,
+      is_speech: false,
     };
     let decision = vad.process(&resampled_chunk.samples, TARGET_SAMPLE_RATE)?;
 

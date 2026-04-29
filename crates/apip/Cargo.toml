@@ -6,9 +6,9 @@ edition.workspace = true
 [dependencies]
 cpal = "0.17.3"
 thiserror = { workspace = true }
-ort = { version = "2.0.0-rc.12", features = ["ndarray"] }
-ndarray = "0.17.2"
 rubato = "2.0.0"
 audioadapter-buffers = "3.0.0"
+ort = { workspace = true }
 chrono = { workspace = true }
 tokio = { workspace = true }
+ndarray = { workspace = true }

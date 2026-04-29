@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/apip"]
+members = ["crates/apip", "crates/wuw"]
 
 [workspace.package]
 version = "0.1.0"
@@ -10,3 +10,5 @@ edition = "2024"
 thiserror = "2.0.18"
 chrono = "0.4.44"
 tokio = { version = "1", features = ["full"] }
+ort = { version = "2.0.0-rc.12", features = ["ndarray"] }
+ndarray = "0.17.2"
