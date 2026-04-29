@@ -5,3 +5,4 @@ models/
 *.onnx
 .env
 .DS_Store
+.venv

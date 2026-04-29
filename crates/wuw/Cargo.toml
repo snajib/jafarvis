@@ -9,3 +9,6 @@ ort = { workspace = true }
 ndarray = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
+
+[dev-dependencies]
+hound = "3.5.1"

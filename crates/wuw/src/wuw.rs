@@ -8,8 +8,8 @@ use apip::{AudioChunk, FRAME_SAMPLES, SAMPLE_RATE};
 
 use crate::error::WuwError;
 use crate::openwakeword::{
-  EMBEDDING_DIM, EMBEDDING_WINDOW, MEL_BINS, MEL_NORM_OFFSET, MEL_NORM_SCALE, MEL_SLIDE_SAMPLES,
-  MEL_WINDOW_FRAMES, MEL_WINDOW_SAMPLES,
+  EMBEDDING_DIM, EMBEDDING_WINDOW, MEL_NORM_OFFSET, MEL_NORM_SCALE, MEL_SLIDE_SAMPLES,
+  MEL_WINDOW_SAMPLES,
 };
 use crate::trigger::{Trigger, TriggerSource};
 
@@ -142,20 +142,19 @@ impl WakeWord {
     &mut self,
     mel: &ndarray::ArrayD<f32>,
   ) -> Result<[f32; EMBEDDING_DIM], WuwError> {
-    let input = mel
-      .view()
-      .into_shape_with_order((MEL_WINDOW_FRAMES, MEL_BINS, 1))
-      .map_err(|e| WuwError::EmbeddingInference(e.to_string()))?
-      .to_owned(); // <- add this
+    // mel is [1, 1, 73, 32]
+    // permute to [1, 73, 32, 1] — move the last dim to front after batch
+    let permuted = mel.view().permuted_axes(vec![0, 2, 3, 1]).to_owned();
 
     let input_val =
-      Value::from_array(input).map_err(|e| WuwError::EmbeddingInference(e.to_string()))?;
+      Value::from_array(permuted).map_err(|e| WuwError::EmbeddingInference(e.to_string()))?;
+
     let result = self
       .embedding_session
       .run(ort::inputs!["input_1" => input_val])
       .map_err(|e| WuwError::EmbeddingInference(e.to_string()))?;
 
-    let raw = result[0]
+    let raw = result["conv2d_19"]
       .try_extract_array::<f32>()
       .map_err(|e| WuwError::EmbeddingInference(e.to_string()))?;
 
@@ -172,28 +171,26 @@ impl WakeWord {
     let flat: Vec<f32> = self.embedding_buffer.iter().flatten().copied().collect();
     let input = Array3::from_shape_vec((1, EMBEDDING_WINDOW, EMBEDDING_DIM), flat)
       .map_err(|e| WuwError::KeywordInference(e.to_string()))?;
-
     let input_val =
       Value::from_array(input).map_err(|e| WuwError::KeywordInference(e.to_string()))?;
-
     let result = self
       .keyword_session
-      .run(ort::inputs!["input_1" => input_val])
+      .run(ort::inputs!["x.1" => input_val])
       .map_err(|e| WuwError::KeywordInference(e.to_string()))?;
-
-    let raw = result[0]
+    let raw = result["53"]
       .try_extract_array::<f32>()
       .map_err(|e| WuwError::KeywordInference(e.to_string()))?;
-
-    raw
+    let score = raw
       .as_slice()
       .and_then(|s| s.first())
       .copied()
-      .ok_or_else(|| WuwError::KeywordInference("empty keyword output".to_string()))
+      .ok_or_else(|| WuwError::KeywordInference("empty keyword output".to_string()))?;
+
+    Ok(score)
   }
 
   fn slide_accumulator(&mut self) {
-    while self.slide_remainder >= MEL_SLIDE_SAMPLES {
+    if self.slide_remainder >= MEL_SLIDE_SAMPLES {
       let drain = MEL_SLIDE_SAMPLES.min(self.audio_accumulator.len());
       self.audio_accumulator.drain(..drain);
       self.slide_remainder -= MEL_SLIDE_SAMPLES;
