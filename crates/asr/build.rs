@@ -85,7 +85,6 @@ fn main() {
     .allowlist_var("WHISPER_.*")
     .derive_debug(true)
     .derive_copy(true)
-    .derive_eq(true)
     .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
     .generate()
     .expect("Unable to generate whisper bindings");
